@@ -1,9 +1,10 @@
 import React, { Component } from 'react'
 import { TemperatureModule }  from './TemperatureModule'
-import { convertTemperature, boilingCheck } from '../util/AppUtil'
+import {boilingCheck } from '../util/AppUtil'
 import { Boiler } from './Boiler'
+import { connect } from 'react-redux'
 
-export default class TemperatureController extends Component {
+class TemperatureController extends Component {
     constructor(props){
         super(props)
         this.state={
@@ -11,14 +12,13 @@ export default class TemperatureController extends Component {
             temperature :'',
             boilingCross : false
         }
-        this.handleChangeInTemperature=this.handleChangeInTemperature.bind(this)
     }
 
-    handleChangeInTemperature=(scale, temperature)=>{
-            this.setState({
-                scale,
-                temperature
-            },()=>this.calculate())        
+    componentWillReceiveProps(nextProps){
+        this.setState({
+            scale : nextProps.scale,
+            temperature : nextProps.temperature
+        },()=>this.calculate())
     }
 
     calculate = () =>{
@@ -29,16 +29,25 @@ export default class TemperatureController extends Component {
     }
 
     render() {
-        const { scale, temperature, boilingCross } = this.state
-        const farenhiet = scale === 'c' ? convertTemperature(scale,temperature) : temperature
-        const celcius = scale === 'f' ? convertTemperature(scale,temperature) : temperature
+        const { boilingCross } = this.state
         return (
             <div>
                 <h1 className='header'> Welcome to temperature controller</h1>
-                <TemperatureModule temperature={farenhiet} scale={'f'} handleChangeInTemperature={this.handleChangeInTemperature}/>
-                <TemperatureModule temperature={celcius} scale={'c'} handleChangeInTemperature={this.handleChangeInTemperature}/>
+                <TemperatureModule scale={'f'} />
+                <TemperatureModule scale={'c'}/>
                 <Boiler status={boilingCross}/>
             </div>
         )
     }
 }
+
+
+const mapStateToProps = (state) => {
+    return {
+        scale: state.tempReducer.scale,
+        temperature: state.tempReducer.temperature,
+    };
+};
+
+
+export default connect(mapStateToProps)(TemperatureController)
